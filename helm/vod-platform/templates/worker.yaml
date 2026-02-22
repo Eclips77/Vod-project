@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    app: vod-worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: vod-worker
+  template:
+    metadata:
+      labels:
+        app: vod-worker
+    spec:
+      containers:
+        - name: vod-worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://{{ .Release.Name }}-mongodb:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.credentials.database }}"
+            - name: RABBITMQ_URI
+              value: "amqp://{{ .Values.rabbitmq.credentials.username }}:{{ .Values.rabbitmq.credentials.password }}@{{ .Release.Name }}-rabbitmq:{{ .Values.rabbitmq.service.port }}"
+            - name: AWS_REGION
+              value: {{ .Values.global.env.AWS_REGION }}
+            - name: S3_BUCKET_NAME
+              value: {{ .Values.global.env.S3_BUCKET_NAME }}
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.global.env.AWS_ACCESS_KEY_ID }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.global.env.AWS_SECRET_ACCESS_KEY }}
+          resources:
+{{ toYaml .Values.worker.resources | indent 12 }}
