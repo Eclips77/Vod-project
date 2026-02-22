@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: vod-api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      app: vod-api
+  template:
+    metadata:
+      labels:
+        app: vod-api
+    spec:
+      containers:
+        - name: vod-api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://{{ .Release.Name }}-mongodb:{{ .Values.mongodb.service.port }}/{{ .Values.mongodb.credentials.database }}"
+            - name: RABBITMQ_URI
+              value: "amqp://{{ .Values.rabbitmq.credentials.username }}:{{ .Values.rabbitmq.credentials.password }}@{{ .Release.Name }}-rabbitmq:{{ .Values.rabbitmq.service.port }}"
+            - name: AWS_REGION
+              value: {{ .Values.global.env.AWS_REGION }}
+            - name: S3_BUCKET_NAME
+              value: {{ .Values.global.env.S3_BUCKET_NAME }}
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.global.env.AWS_ACCESS_KEY_ID }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.global.env.AWS_SECRET_ACCESS_KEY }}
+          resources:
+{{ toYaml .Values.api.resources | indent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+spec:
+  type: {{ .Values.api.service.type }}
+  ports:
+    - port: {{ .Values.api.service.port }}
+      targetPort: 3000
+  selector:
+    app: vod-api

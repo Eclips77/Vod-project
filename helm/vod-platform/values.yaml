@@ -1,0 +1,61 @@
+global:
+  env:
+    AWS_REGION: us-east-1
+    S3_BUCKET_NAME: my-bucket
+    AWS_ACCESS_KEY_ID: my-access-key
+    AWS_SECRET_ACCESS_KEY: my-secret-key
+
+mongodb:
+  enabled: true
+  image: mongo:6.0
+  service:
+    port: 27017
+  persistence:
+    enabled: true
+    size: 10Gi
+  credentials:
+    database: vod_db
+
+rabbitmq:
+  enabled: true
+  image: rabbitmq:3-management
+  service:
+    port: 5672
+    managementPort: 15672
+  persistence:
+    enabled: true
+    size: 5Gi
+  credentials:
+    username: user
+    password: password
+
+api:
+  replicaCount: 2
+  image:
+    repository: my-repo/vod-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+worker:
+  replicaCount: 2
+  image:
+    repository: my-repo/vod-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
