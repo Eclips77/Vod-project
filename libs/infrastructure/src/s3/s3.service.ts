@@ -32,7 +32,7 @@ export class S3Service implements IStorageService {
     });
   }
 
-  async getPresignedUrl(
+  async getUploadPresignedUrl(
     key: string,
     contentType: string,
     expiresIn: number = 3600,

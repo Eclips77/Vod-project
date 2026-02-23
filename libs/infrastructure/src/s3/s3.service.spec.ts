@@ -47,15 +47,15 @@ describe('S3Service', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getPresignedUrl', () => {
-    it('should return a presigned URL', async () => {
+  describe('getUploadPresignedUrl', () => {
+    it('should return a presigned URL for upload', async () => {
       const key = 'test-key';
       const contentType = 'video/mp4';
       const expectedUrl = 'https://presigned-url';
 
       (getSignedUrl as jest.Mock).mockResolvedValue(expectedUrl);
 
-      const result = await service.getPresignedUrl(key, contentType);
+      const result = await service.getUploadPresignedUrl(key, contentType);
 
       expect(getSignedUrl).toHaveBeenCalledWith(
         expect.any(Object), // s3Client
