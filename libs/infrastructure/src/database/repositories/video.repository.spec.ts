@@ -32,6 +32,7 @@ describe('VideoRepository', () => {
       static find = jest.fn();
       static findById = jest.fn();
       static findByIdAndUpdate = jest.fn();
+      static findOneAndUpdate = jest.fn();
       static findByIdAndDelete = jest.fn();
     }
 
@@ -103,7 +104,9 @@ describe('VideoRepository', () => {
 
       const result = await repository.update(videoEntity);
       expect(result.title).toBe('New Title');
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith('123', videoEntity, { new: true });
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith('123', videoEntity, {
+        new: true,
+      });
     });
 
     it('should throw NotFoundException if video not found', async () => {
@@ -111,7 +114,9 @@ describe('VideoRepository', () => {
       const exec = jest.fn().mockResolvedValue(null);
       (model.findByIdAndUpdate as jest.Mock).mockReturnValue({ exec });
 
-      await expect(repository.update(videoEntity)).rejects.toThrow(NotFoundException);
+      await expect(repository.update(videoEntity)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -122,6 +127,36 @@ describe('VideoRepository', () => {
 
       await repository.delete('123');
       expect(model.findByIdAndDelete).toHaveBeenCalledWith('123');
+    });
+  });
+
+  describe('startProcessing', () => {
+    it('should update status to PROCESSING if valid', async () => {
+      const id = '123';
+      const updatedDoc = { ...mockVideoDoc, status: VideoStatus.PROCESSING };
+      const exec = jest.fn().mockResolvedValue(updatedDoc);
+      (model.findOneAndUpdate as jest.Mock).mockReturnValue({ exec });
+
+      const result = await repository.startProcessing(id);
+      expect(result).toBeDefined();
+      expect(result!.status).toBe(VideoStatus.PROCESSING);
+      expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+        {
+          _id: id,
+          status: { $nin: [VideoStatus.PROCESSING, VideoStatus.COMPLETED] },
+        },
+        { status: VideoStatus.PROCESSING },
+        { new: true },
+      );
+    });
+
+    it('should return null if condition fails', async () => {
+      const id = '123';
+      const exec = jest.fn().mockResolvedValue(null);
+      (model.findOneAndUpdate as jest.Mock).mockReturnValue({ exec });
+
+      const result = await repository.startProcessing(id);
+      expect(result).toBeNull();
     });
   });
 });

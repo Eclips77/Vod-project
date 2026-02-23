@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { VideoRepository, RabbitMQService } from '@app/infrastructure';
-import { VideoStatus } from '@app/core';
 
 @Injectable()
 export class ProcessVideoUseCase {
@@ -10,21 +9,16 @@ export class ProcessVideoUseCase {
   ) {}
 
   async execute(id: string, traceId: string) {
-    const video = await this.videoRepository.findById(id);
-    if (!video) {
-      throw new NotFoundException(`Video with ID ${id} not found`);
-    }
+    const video = await this.videoRepository.startProcessing(id);
 
-    if (
-      video.status === VideoStatus.PROCESSING ||
-      video.status === VideoStatus.COMPLETED
-    ) {
+    if (!video) {
+      // Check if video exists to provide correct error message
+      const existingVideo = await this.videoRepository.findById(id);
+      if (!existingVideo) {
+        throw new NotFoundException(`Video with ID ${id} not found`);
+      }
       return { message: 'Video is already being processed or completed' };
     }
-
-    // Update status to PROCESSING
-    video.status = VideoStatus.PROCESSING;
-    await this.videoRepository.update(video);
 
     // Publish to RabbitMQ
     await this.rabbitMQService.sendToQueue(

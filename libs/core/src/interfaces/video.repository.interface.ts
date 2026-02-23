@@ -6,4 +6,5 @@ export interface IVideoRepository {
   findAll(): Promise<Video[]>;
   update(video: Video): Promise<Video>;
   delete(id: string): Promise<void>;
+  startProcessing(id: string): Promise<Video | null>;
 }

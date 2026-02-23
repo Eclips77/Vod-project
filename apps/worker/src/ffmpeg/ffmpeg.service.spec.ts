@@ -85,7 +85,9 @@ describe('FfmpegService', () => {
 
       await promise;
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('50% done'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('50% done'),
+      );
     });
   });
 });
