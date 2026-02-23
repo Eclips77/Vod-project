@@ -56,6 +56,7 @@ export class VideoProcessorService {
           s3Key,
           fileContent,
           contentType,
+          'public, max-age=31536000',
         );
         if (file.endsWith('.m3u8')) {
           playlistUrl = url;

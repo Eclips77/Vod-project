@@ -89,6 +89,38 @@ describe('S3Service', () => {
             Key: key,
             Body: file,
             ContentType: contentType,
+            CacheControl: undefined,
+          }),
+        }),
+      );
+      expect(mockUploadInstance.done).toHaveBeenCalled();
+      expect(result).toBe(`https://test-bucket.s3.amazonaws.com/${key}`);
+    });
+
+    it('should upload a file with cache control', async () => {
+      const key = 'test-key';
+      const file = Buffer.from('test');
+      const contentType = 'text/plain';
+      const cacheControl = 'public, max-age=3600';
+
+      const mockUploadInstance = {
+        done: jest.fn().mockResolvedValue({}),
+        on: jest.fn(),
+      };
+      (Upload as unknown as jest.Mock).mockImplementation(
+        () => mockUploadInstance,
+      );
+
+      const result = await service.upload(key, file, contentType, cacheControl);
+
+      expect(Upload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            Bucket: 'test-bucket',
+            Key: key,
+            Body: file,
+            ContentType: contentType,
+            CacheControl: cacheControl,
           }),
         }),
       );

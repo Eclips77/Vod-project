@@ -54,6 +54,7 @@ export class S3Service implements IStorageService {
     key: string,
     file: Buffer | Readable,
     contentType: string,
+    cacheControl?: string,
   ): Promise<string> {
     try {
       const parallelUploads3 = new Upload({
@@ -63,6 +64,7 @@ export class S3Service implements IStorageService {
           Key: key,
           Body: file,
           ContentType: contentType,
+          CacheControl: cacheControl,
         },
       });
 
