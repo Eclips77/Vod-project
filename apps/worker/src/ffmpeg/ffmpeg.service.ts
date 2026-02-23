@@ -15,6 +15,7 @@ export class FfmpegService {
           '-hls_time 10', // 10 second segments
           '-hls_list_size 0', // Include all segments in the playlist
           '-c:v libx264', // Video codec
+          '-preset veryfast', // Optimize for speed
           '-c:a aac', // Audio codec
           '-f hls', // Format
         ])
