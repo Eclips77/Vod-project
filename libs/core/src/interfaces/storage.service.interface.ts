@@ -7,7 +7,7 @@ export interface IStorageService {
    * @param contentType The content type of the file.
    * @param expiresIn Expiration time in seconds.
    */
-  getPresignedUrl(
+  getUploadPresignedUrl(
     key: string,
     contentType: string,
     expiresIn?: number,

@@ -31,7 +31,7 @@ export class CreateVideoUseCase {
       await this.videoRepository.create(video);
 
       // Generate Presigned URL
-      const uploadUrl = await this.s3Service.getPresignedUrl(
+      const uploadUrl = await this.s3Service.getUploadPresignedUrl(
         key,
         'video/mp4',
         3600,
