@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { VideoDocument, Video } from '../schemas/video.schema';
-import { IVideoRepository, Video as VideoEntity } from '@app/core';
+import { IVideoRepository, Video as VideoEntity, VideoStatus } from '@app/core';
 
 @Injectable()
 export class VideoRepository implements IVideoRepository {
@@ -36,6 +36,21 @@ export class VideoRepository implements IVideoRepository {
     }
 
     return this.mapToEntity(updatedVideo);
+  }
+
+  async startProcessing(id: string): Promise<VideoEntity | null> {
+    const updatedVideo = await this.videoModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          status: { $nin: [VideoStatus.PROCESSING, VideoStatus.COMPLETED] },
+        },
+        { status: VideoStatus.PROCESSING },
+        { new: true },
+      )
+      .exec();
+
+    return updatedVideo ? this.mapToEntity(updatedVideo) : null;
   }
 
   async delete(id: string): Promise<void> {
