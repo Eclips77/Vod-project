@@ -87,6 +87,10 @@ describe('VideoProcessorService', () => {
       mockDownloadStream.push(null); // End stream immediately
       (s3Service.download as jest.Mock).mockResolvedValue(mockDownloadStream);
 
+      const mockReadStream = new Readable();
+      mockReadStream.push(null);
+      (fs.createReadStream as jest.Mock).mockReturnValue(mockReadStream);
+
       (s3Service.upload as jest.Mock).mockResolvedValue(
         'https://s3-bucket/encoded/playlist.m3u8',
       );
@@ -107,6 +111,13 @@ describe('VideoProcessorService', () => {
         expect.stringContaining('output'),
       );
       expect(s3Service.upload).toHaveBeenCalledTimes(2); // playlist + 1 segment
+      expect(s3Service.upload).toHaveBeenCalledWith(
+        expect.stringContaining('encoded/test-video-id/'),
+        expect.anything(),
+        expect.stringMatching(/application\/vnd\.apple\.mpegurl|video\/MP2T/),
+        'public, max-age=31536000',
+      );
+
       expect(videoRepository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: videoId,

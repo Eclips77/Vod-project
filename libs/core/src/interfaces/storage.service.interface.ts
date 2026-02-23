@@ -18,11 +18,13 @@ export interface IStorageService {
    * @param key The key (path) where the file will be stored.
    * @param file The file content as a Buffer or Readable stream.
    * @param contentType The content type of the file.
+   * @param cacheControl Optional Cache-Control header value.
    */
   upload(
     key: string,
     file: Buffer | Readable,
     contentType: string,
+    cacheControl?: string,
   ): Promise<string>;
 
   /**
